@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract PropertyNFT is ERC721URIStorage, Ownable {
     uint256 private _tokenIds;
+    uint256 public tokenCount; // Nombre total de tokens mintés
 
     // Mapping pour suivre le dernier timestamp de transaction pour chaque adresse (cooldown)
     mapping(address => uint256) public lastTransaction;
@@ -15,7 +16,7 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         string name;
         string propertyType; // "maison", "gare", "hotel"
         string location;
-        uint256 value;       // valeur en wei (utilisez ethers.parseUnits avec le bon nombre de décimales côté front)
+        uint256 value;       // valeur en wei
         uint256 surface;     // en m²
         string documentHash;
         string imageHash;
@@ -36,17 +37,14 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
     constructor(address initialOwner)
         ERC721("PropertyNFT", "PROP")
         Ownable(initialOwner)
-    {
-        // Le propriétaire initial est défini via Ownable(initialOwner)
-    }
+    {}
 
     // Fonction utilitaire pour comparer des chaînes de caractères
     function compareStrings(string memory a, string memory b) internal pure returns (bool) {
         return keccak256(bytes(a)) == keccak256(bytes(b));
     }
 
-    /// @notice Mint (crée) un nouveau bien immobilier avec ses métadonnées, y compris la gestion de la vente.
-    /// @dev Seul le propriétaire (admin) peut appeler cette fonction.
+    /// @notice Mint un nouveau bien immobilier avec ses métadonnées, y compris la gestion de la vente.
     function mintProperty(
         address to,
         string memory _name,
@@ -60,9 +58,7 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         bool _forSale,
         uint256 _salePrice
     ) public onlyOwner returns (uint256) {
-        // Vérifie que le destinataire ne détient pas plus de 4 biens.
         require(balanceOf(to) < 4, "Recipient already holds max properties");
-        // Vérifie que le type de bien est valide.
         require(
             compareStrings(_propertyType, "maison") ||
             compareStrings(_propertyType, "gare") ||
@@ -71,11 +67,11 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         );
 
         _tokenIds++;
+        tokenCount = _tokenIds;  // Mise à jour du compteur
         uint256 newTokenId = _tokenIds;
         _mint(to, newTokenId);
         _setTokenURI(newTokenId, tokenURI);
 
-        // Initialise les informations du bien
         address[] memory prevOwners; // tableau vide
         properties[newTokenId] = Property({
             name: _name,
@@ -92,21 +88,17 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
             salePrice: _salePrice
         });
 
-        // Met à jour lastTransaction pour le destinataire lors du mint.
         lastTransaction[to] = block.timestamp;
-
         return newTokenId;
     }
 
-    /// @notice Permet d'échanger 3 "maisons" contre une "gare".
+    /// @notice Permet d'échanger 3 "maisons" contre une "gare"
     function exchangeForGare(uint256 tokenId1, uint256 tokenId2, uint256 tokenId3, string memory tokenURI) public returns (uint256) {
-        // Vérifie que l'appelant possède les 3 tokens.
         require(ownerOf(tokenId1) == msg.sender &&
                 ownerOf(tokenId2) == msg.sender &&
                 ownerOf(tokenId3) == msg.sender,
                 "Caller must own all tokens");
 
-        // Vérifie que tous les tokens sont de type "maison".
         require(
             compareStrings(properties[tokenId1].propertyType, "maison") &&
             compareStrings(properties[tokenId2].propertyType, "maison") &&
@@ -114,25 +106,22 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
             "All tokens must be maison"
         );
 
-        // Vérifie que les valeurs des tokens sont identiques.
         require(
             properties[tokenId1].value == properties[tokenId2].value &&
             properties[tokenId1].value == properties[tokenId3].value,
             "All tokens must have the same value"
         );
 
-        // Brûle les 3 tokens.
         _burn(tokenId1);
         _burn(tokenId2);
         _burn(tokenId3);
 
-        // Mint un nouveau token de type "gare".
         _tokenIds++;
+        tokenCount = _tokenIds;
         uint256 newTokenId = _tokenIds;
         _mint(msg.sender, newTokenId);
         _setTokenURI(newTokenId, tokenURI);
 
-        // Initialise les informations du nouveau bien.
         address[] memory emptyOwners;
         properties[newTokenId] = Property({
             name: "Gare",
@@ -152,16 +141,14 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         return newTokenId;
     }
 
-    /// @notice Permet d'échanger 4 "maisons" contre un "hotel".
+    /// @notice Permet d'échanger 4 "maisons" contre un "hotel"
     function exchangeForHotel(uint256 tokenId1, uint256 tokenId2, uint256 tokenId3, uint256 tokenId4, string memory tokenURI) public returns (uint256) {
-        // Vérifie que l'appelant possède les 4 tokens.
         require(ownerOf(tokenId1) == msg.sender &&
                 ownerOf(tokenId2) == msg.sender &&
                 ownerOf(tokenId3) == msg.sender &&
                 ownerOf(tokenId4) == msg.sender,
                 "Caller must own all tokens");
 
-        // Vérifie que tous les tokens sont de type "maison".
         require(
             compareStrings(properties[tokenId1].propertyType, "maison") &&
             compareStrings(properties[tokenId2].propertyType, "maison") &&
@@ -170,7 +157,6 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
             "All tokens must be maison"
         );
 
-        // Vérifie que les valeurs des tokens sont identiques.
         require(
             properties[tokenId1].value == properties[tokenId2].value &&
             properties[tokenId1].value == properties[tokenId3].value &&
@@ -178,19 +164,17 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
             "All tokens must have the same value"
         );
 
-        // Brûle les 4 tokens.
         _burn(tokenId1);
         _burn(tokenId2);
         _burn(tokenId3);
         _burn(tokenId4);
 
-        // Mint un nouveau token de type "hotel".
         _tokenIds++;
+        tokenCount = _tokenIds;
         uint256 newTokenId = _tokenIds;
         _mint(msg.sender, newTokenId);
         _setTokenURI(newTokenId, tokenURI);
 
-        // Initialise les informations du nouveau bien.
         address[] memory emptyOwners;
         properties[newTokenId] = Property({
             name: "Hotel",
@@ -210,25 +194,14 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         return newTokenId;
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
     // Surcharge de _update pour intégrer la logique avant/après transfert
-    ////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * @dev Surcharge de _update pour insérer la logique de cooldown, limite de possession,
-     * et mise à jour de l'historique des propriétaires.
-     * Cette fonction est appelée pour chaque opération de transfert (mint, burn, transfert).
-     */
     function _update(address to, uint256 tokenId, address auth) internal override returns (address) {
         address from = _ownerOf(tokenId);
         
-        // Si c'est un transfert classique (ni mint ni burn)
         if (from != address(0) && to != address(0) && from != to) {
-            // Vérifie le cooldown pour l'expéditeur
             require(block.timestamp >= lastTransaction[from] + COOLDOWN, "Sender in cooldown period");
             lastTransaction[from] = block.timestamp;
             
-            // Pour le destinataire, appliquer le lock initial s'il s'agit de son premier bien
             if (balanceOf(to) == 0) {
                 require(block.timestamp >= lastTransaction[to] + INITIAL_LOCK, "Recipient initial lock active");
             } else {
@@ -239,10 +212,8 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
             require(balanceOf(to) + 1 <= 4, "Recipient would exceed max properties");
         }
         
-        // Appel de la fonction parent qui effectue la mise à jour réelle (transfert, mint ou burn)
         address previousOwner = super._update(to, tokenId, auth);
         
-        // Logique après transfert pour un transfert classique
         if (from != address(0) && to != address(0) && from != to) {
             properties[tokenId].previousOwners.push(from);
             properties[tokenId].lastTransferAt = block.timestamp;
@@ -254,5 +225,14 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
     // Getter pour récupérer l'intégralité du tableau previousOwners
     function getPreviousOwners(uint256 tokenId) public view returns (address[] memory) {
         return properties[tokenId].previousOwners;
+    }
+    
+    // Optionnel : fonction pour récupérer toutes les propriétés (pour un nombre limité de tokens)
+    function getAllProperties() public view returns (Property[] memory) {
+        Property[] memory allProperties = new Property[](tokenCount);
+        for (uint256 i = 1; i <= tokenCount; i++) {
+            allProperties[i - 1] = properties[i];
+        }
+        return allProperties;
     }
 }
