@@ -5,13 +5,11 @@ import Home from './pages/Home';
 import Properties from './pages/Properties';
 import MyProperties from './pages/MyProperties';
 import Exchange from './pages/Exchange';
-import WalletConnect from './components/WalletConnect';
 
 function App() {
   return (
     <div>
       <Navbar />
-      <WalletConnect />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/properties" element={<Properties />} />
