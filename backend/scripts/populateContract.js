@@ -1,8 +1,9 @@
+// backend/scripts/populateContract.js
 const { ethers } = require("hardhat");
 const fs = require('fs');
 
 async function main() {
-  // Récupérer l'adresse du contrat depuis un fichier JSON
+  // Récupérer l'adresse du contrat depuis deployedContract.json
   const deployedInfo = JSON.parse(fs.readFileSync('deployedContract.json', 'utf8'));
   const contractAddress = deployedInfo.address;
 
@@ -22,9 +23,24 @@ async function main() {
       surface: 100,
       documentHash: "docHash1",
       imageHash: "imgHash1",
-      tokenURI: "ipfs://tokenURI1"
+      tokenURI: "ipfs://tokenURI1",
+      forSale: true,
+      salePrice: ethers.parseEther("0.5")
     },
-    // Vous pouvez ajouter d'autres propriétés ici
+    {
+      to: owner.address,
+      name: "Maison 2",
+      propertyType: "maison",
+      location: "Rue 2",
+      value: ethers.parseEther("12"),
+      surface: 120,
+      documentHash: "docHash2",
+      imageHash: "imgHash2",
+      tokenURI: "ipfs://tokenURI2",
+      forSale: false,
+      salePrice: ethers.parseEther("15")
+    },
+    // Ajoutez d'autres propriétés si nécessaire
   ];
 
   for (const prop of properties) {
@@ -38,7 +54,9 @@ async function main() {
       prop.surface,
       prop.documentHash,
       prop.imageHash,
-      prop.tokenURI
+      prop.tokenURI,
+      prop.forSale,
+      prop.salePrice
     );
     await tx.wait();
     console.log(`${prop.name} ajouté avec succès !`);

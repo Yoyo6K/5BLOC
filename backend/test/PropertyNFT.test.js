@@ -24,7 +24,9 @@ describe("PropertyNFT", function () {
           120,
           "docHash123",
           "imgHash123",
-          tokenURI
+          tokenURI,
+          true,
+          ethers.parseEther("0.5")
         )
       ).to.emit(propertyNFT, "Transfer");
       
@@ -33,6 +35,8 @@ describe("PropertyNFT", function () {
       expect(prop.name).to.equal("Maison 1");
       expect(prop.propertyType).to.equal("maison");
       expect(prop.location).to.equal("Quartier Latin, Lyonne");
+      expect(prop.forSale).to.equal(true);
+      expect(prop.salePrice).to.equal(ethers.parseEther("0.5"));
     });
 
     it("Should revert minting if property type is invalid", async function () {
@@ -46,7 +50,9 @@ describe("PropertyNFT", function () {
           100,
           "docHash",
           "imgHash",
-          tokenURI
+          tokenURI,
+          false,
+          ethers.parseEther("0")
         )
       ).to.be.revertedWith("Invalid property type");
     });
@@ -63,8 +69,10 @@ describe("PropertyNFT", function () {
           100,
           "docHash",
           "imgHash",
-          tokenURI
-        );
+          tokenURI,
+          true,
+          ethers.parseEther("0.5")
+        );        
       }
       // La 5ème tentative doit échouer
       await expect(
@@ -77,7 +85,9 @@ describe("PropertyNFT", function () {
           100,
           "docHash",
           "imgHash",
-          tokenURI
+          tokenURI,
+          true,
+          ethers.parseEther("0.5")
         )
       ).to.be.revertedWith("Recipient already holds max properties");
     });
@@ -97,7 +107,9 @@ describe("PropertyNFT", function () {
             100,
             "docHash",
             "imgHash",
-            tokenURI
+            tokenURI,
+            true,
+            ethers.parseEther("0.5")
           );
         }
         // Exécuter l'échange
@@ -112,18 +124,18 @@ describe("PropertyNFT", function () {
 
       it("Should revert exchange for gare if tokens are not all 'maison'", async function () {
         // Mint 2 maisons et 1 token de type "hotel"
-        await propertyNFT.mintProperty(owner.address, "Maison 1", "maison", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI);
-        await propertyNFT.mintProperty(owner.address, "Maison 2", "maison", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI);
-        await propertyNFT.mintProperty(owner.address, "Hotel 1", "hotel", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI);
+        await propertyNFT.mintProperty(owner.address, "Maison 1", "maison", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI, true, ethers.parseEther("0.5"));
+        await propertyNFT.mintProperty(owner.address, "Maison 2", "maison", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI, true, ethers.parseEther("0.5"));
+        await propertyNFT.mintProperty(owner.address, "Hotel 1", "hotel", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI, false, ethers.parseEther("0"));
         await expect(propertyNFT.exchangeForGare(1, 2, 3, tokenURI))
           .to.be.revertedWith("All tokens must be maison");
       });
 
       it("Should revert exchange for gare if tokens do not have the same value", async function () {
         // Mint 3 maisons avec des valeurs différentes
-        await propertyNFT.mintProperty(owner.address, "Maison 1", "maison", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI);
-        await propertyNFT.mintProperty(owner.address, "Maison 2", "maison", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI);
-        await propertyNFT.mintProperty(owner.address, "Maison 3", "maison", "Location", ethers.parseEther("2"), 100, "docHash", "imgHash", tokenURI);
+        await propertyNFT.mintProperty(owner.address, "Maison 1", "maison", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI, true, ethers.parseEther("0.5"));
+        await propertyNFT.mintProperty(owner.address, "Maison 2", "maison", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI, true, ethers.parseEther("0.5"));
+        await propertyNFT.mintProperty(owner.address, "Maison 3", "maison", "Location", ethers.parseEther("2"), 100, "docHash", "imgHash", tokenURI, true, ethers.parseEther("1"));
         await expect(propertyNFT.exchangeForGare(1, 2, 3, tokenURI))
           .to.be.revertedWith("All tokens must have the same value");
       });
@@ -131,7 +143,7 @@ describe("PropertyNFT", function () {
 
     describe("Exchange for Hotel", function () {
       it("Should exchange 4 maisons for one hotel", async function () {
-        // Mint 4 tokens de type "maison"
+        // Mint 4 tokens de type "maison" pour owner
         for (let i = 0; i < 4; i++) {
           await propertyNFT.mintProperty(
             owner.address,
@@ -142,7 +154,9 @@ describe("PropertyNFT", function () {
             100,
             "docHash",
             "imgHash",
-            tokenURI
+            tokenURI,
+            true,
+            ethers.parseEther("0.5")
           );
         }
         // Exécuter l'échange
@@ -157,10 +171,10 @@ describe("PropertyNFT", function () {
 
       it("Should revert exchange for hotel if tokens are not all 'maison'", async function () {
         // Mint 3 maisons et 1 token de type "gare"
-        await propertyNFT.mintProperty(owner.address, "Maison 1", "maison", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI);
-        await propertyNFT.mintProperty(owner.address, "Maison 2", "maison", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI);
-        await propertyNFT.mintProperty(owner.address, "Maison 3", "maison", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI);
-        await propertyNFT.mintProperty(owner.address, "Gare", "gare", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI);
+        await propertyNFT.mintProperty(owner.address, "Maison 1", "maison", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI, true, ethers.parseEther("0.5"));
+        await propertyNFT.mintProperty(owner.address, "Maison 2", "maison", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI, true, ethers.parseEther("0.5"));
+        await propertyNFT.mintProperty(owner.address, "Maison 3", "maison", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI, true, ethers.parseEther("0.5"));
+        await propertyNFT.mintProperty(owner.address, "Gare", "gare", "Location", ethers.parseEther("1"), 100, "docHash", "imgHash", tokenURI, false, ethers.parseEther("0"));
         await expect(propertyNFT.exchangeForHotel(1, 2, 3, 4, tokenURI))
           .to.be.revertedWith("All tokens must be maison");
       });
@@ -179,10 +193,12 @@ describe("PropertyNFT", function () {
         100,
         "docHash",
         "imgHash",
-        tokenURI
+        tokenURI,
+        true,
+        ethers.parseEther("0.5")
       );
 
-      // Transfert immédiat doit échouer à cause du cooldown
+      // Le transfert immédiat doit échouer à cause du cooldown
       await expect(
         propertyNFT["safeTransferFrom(address,address,uint256)"](owner.address, addr1.address, 1)
       ).to.be.revertedWith("Sender in cooldown period");
@@ -208,19 +224,21 @@ describe("PropertyNFT", function () {
         100,
         "docHash",
         "imgHash",
-        tokenURI
+        tokenURI,
+        true,
+        ethers.parseEther("0.5")
       );
       const propBefore = await propertyNFT.properties(1);
-      // Attendre le cooldown pour le transfert
+      // Augmenter le temps de 5 minutes
       await time.increase(5 * 60);
       // Transférer le bien de owner à addr1
       await propertyNFT["safeTransferFrom(address,address,uint256)"](owner.address, addr1.address, 1);
       const propAfter = await propertyNFT.properties(1);
-      // Utiliser le getter pour récupérer le tableau des previousOwners
+      // Récupérer le tableau previousOwners via le getter
       const previousOwners = await propertyNFT.getPreviousOwners(1);
       expect(previousOwners).to.include(owner.address);
       // Vérifier que lastTransferAt a été mis à jour (supérieur à createdAt)
       expect(propAfter.lastTransferAt).to.be.gt(propBefore.createdAt);
     });
-  });  
+  });
 });
