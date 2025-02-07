@@ -1,4 +1,5 @@
 import React from 'react';
+
 const PropertyCard = ({ property }) => {
   return (
     <div className="property-card">
@@ -14,7 +15,16 @@ const PropertyCard = ({ property }) => {
       <p><strong>Surface :</strong> {property.surface} m²</p>
       <p><strong>Date de création :</strong> {property.createdAt}</p>
       <p><strong>Dernier transfert :</strong> {property.lastTransferAt}</p>
-      <p><strong>Historique des propriétaires :</strong> {property.previousOwners.length > 0 ? property.previousOwners.join(', ') : 'Aucun propriétaire précédent'}</p>
+      {property.forSale ? (
+        <p><strong>Prix de vente :</strong> {property.salePrice} ETH</p>
+      ) : (
+        <p><strong>Non en vente</strong></p>
+      )}
+      <p>
+        <strong>Historique des propriétaires :</strong> {property.previousOwners.length > 0 
+          ? property.previousOwners.join(', ') 
+          : 'Aucun propriétaire précédent'}
+      </p>
       <p><strong>Hash du document :</strong> {property.documentHash}</p>
     </div>
   );
