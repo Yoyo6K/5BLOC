@@ -1,6 +1,7 @@
 // backend/scripts/populateContract.js
 const { ethers } = require("hardhat");
 const fs = require('fs');
+require('dotenv').config();
 
 async function main() {
   // Récupérer l'adresse du contrat depuis deployedContract.json
@@ -9,26 +10,32 @@ async function main() {
 
   // Récupérer l'instance du contrat déployé
   const PropertyNFT = await ethers.getContractAt("PropertyNFT", contractAddress);
-  const [owner] = await ethers.getSigners();
+
+  // Récupérer l'adresse du propriétaire depuis .env
+  const ownerAddress = process.env.OWNER_ADDRESS;
+  
+  // Impersonner le compte propriétaire pour pouvoir appeler mintProperty (qui est onlyOwner)
+  await ethers.provider.send("hardhat_impersonateAccount", [ownerAddress]);
+  const ownerSigner = await ethers.getSigner(ownerAddress);
 
   console.log("Initialisation des propriétés sur le contrat à l'adresse :", contractAddress);
 
   const properties = [
     {
-      to: owner.address,
+      to: ownerAddress,
       name: "Maison 1",
       propertyType: "maison",
       location: "Quartier A",
-      value: ethers.parseEther("1"),
+      value: ethers.parseEther("1"), // 1 KC, si 1 KC = 10^18 unités. Sinon, utilisez ethers.parseUnits("1", decimals)
       surface: 100,
       documentHash: "docHash1",
       imageHash: "imgHash1",
       tokenURI: "ipfs://tokenURI1",
       forSale: true,
-      salePrice: ethers.parseEther("0.5")
+      salePrice: ethers.parseEther("0.5") // 0.5 KC
     },
     {
-      to: owner.address,
+      to: ownerAddress,
       name: "Maison 2",
       propertyType: "maison",
       location: "Rue 2",
@@ -45,7 +52,8 @@ async function main() {
 
   for (const prop of properties) {
     console.log(`Ajout de ${prop.name}...`);
-    const tx = await PropertyNFT.mintProperty(
+    // Connecter le contrat avec le signer owner pour que onlyOwner soit respecté
+    const tx = await PropertyNFT.connect(ownerSigner).mintProperty(
       prop.to,
       prop.name,
       prop.propertyType,
