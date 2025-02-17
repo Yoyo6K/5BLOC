@@ -194,6 +194,40 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         return newTokenId;
     }
 
+    function buyProperty(uint256 tokenId) external payable {
+        // Récupérer la propriété depuis le mapping
+        Property storage prop = properties[tokenId];
+
+        // Vérifier que le bien est en vente
+        require(prop.forSale, "Property is not for sale");
+        // Vérifier que le montant envoyé est suffisant
+        require(msg.value >= prop.salePrice, "Insufficient funds sent");
+
+        // Récupérer le propriétaire actuel
+        address seller = ownerOf(tokenId);
+
+        // Transférer le NFT de seller à msg.sender (l'acheteur)
+        _transfer(seller, msg.sender, tokenId);
+
+        // Mettre à jour l'historique des propriétaires
+        prop.previousOwners.push(seller);
+        // Mettre à jour le timestamp du dernier transfert
+        prop.lastTransferAt = block.timestamp;
+
+        // Désactiver la mise en vente du bien (ou vous pouvez prévoir une logique différente)
+        prop.forSale = false;
+        prop.salePrice = 0;
+
+        // Optionnel : Rembourser le surplus si msg.value > salePrice
+        if (msg.value > prop.salePrice) {
+        payable(msg.sender).transfer(msg.value - prop.salePrice);
+        }
+
+        // Optionnel : Transférer les fonds au vendeur
+        payable(seller).transfer(prop.salePrice);
+    }
+
+
     // Surcharge de _update pour intégrer la logique avant/après transfert
     function _update(address to, uint256 tokenId, address auth) internal override returns (address) {
         address from = _ownerOf(tokenId);
