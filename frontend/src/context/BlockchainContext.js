@@ -43,11 +43,15 @@ export const BlockchainProvider = ({ children }) => {
     if (account && provider) {
       console.log("contract 2");
       const loadContract = async () => {
-        const contractAddress = deployedContract.address; // Assurez-vous que ce fichier se trouve dans frontend/src
-        // Utilisez le provider pour créer l'instance du contrat pour supporter les appels en lecture
+        const contractAddress = deployedContract.address;
         const instance = new ethers.Contract(contractAddress, PropertyNFTABI, provider);
         setContract(instance);
+      
+        const signer = await provider.getSigner();
+        const contractWithSigner = instance.connect(signer);
+        setContract(contractWithSigner);
       };
+      
       loadContract();
     }
   }, [account, provider]);

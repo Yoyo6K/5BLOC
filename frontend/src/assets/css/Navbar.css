@@ -1,42 +1,67 @@
-/* Navbar */
+/* Style général de la navbar */
 .navbar {
-    background-color: #1a202c; /* bg-gray-900 */
-    color: #ffffff; /* text-white */
-    padding: 16px; /* p-4 */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-md */
-  }
-  
-  /* Container inside navbar */
-  .container {
-    width: 100%;
-    max-width: 1200px; /* mx-auto equivalent */
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  /* Title style */
-  .title {
-    font-size: 1.25rem; /* text-xl */
-    font-weight: bold; /* font-bold */
-  }
-  
-  /* Navigation links container */
+  background-color: #1a1a1a;
+  color: white;
+  padding: 15px 20px;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 1.5rem;
+}
+
+/* Navigation links */
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 20px;
+  align-items: center;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #FFD700;
+}
+
+/* Menu burger */
+.menu-icon {
+  display: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
   .nav-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background: #1a1a1a;
+    width: 100%;
+    text-align: center;
+    padding: 15px 0;
+  }
+
+  .nav-links.active {
     display: flex;
-    gap: 1.5rem; /* space-x-6 */
   }
-  
-  /* Style for each nav link */
-  .nav-link {
-    color: #ffffff; /* text-white */
-    text-decoration: none; /* removes default underline */
-    transition: color 0.3s ease; /* transition */
+
+  .menu-icon {
+    display: block;
   }
-  
-  /* Hover effect on links */
-  .nav-link:hover {
-    color: #e2e8f0; /* hover:text-gray-400 */
-  }
-  
+}

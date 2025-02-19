@@ -14,18 +14,19 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
     // Structure représentant les informations d'un bien, avec gestion de la vente
     struct Property {
         string name;
-        string propertyType; // "maison", "gare", "hotel"
+        string propertyType;  // "maison", "gare", "hotel"
         string location;
-        uint256 value;       // valeur en wei
-        uint256 surface;     // en m²
+        uint256 value;        // valeur en wei
+        uint256 surface;      // en m²
         string documentHash;
-        string imageHash;
+        string image;         // URL de l'image
         address[] previousOwners;
         uint256 createdAt;
         uint256 lastTransferAt;
-        bool forSale;        // Indique si le bien est à vendre
-        uint256 salePrice;   // Prix de vente (en wei)
+        bool forSale;         // Indique si le bien est à vendre
+        uint256 salePrice;    // Prix de vente (en wei)
     }
+
 
     // Association d'un tokenId à ses données
     mapping(uint256 => Property) public properties;
@@ -53,7 +54,7 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         uint256 _value,
         uint256 _surface,
         string memory _documentHash,
-        string memory _imageHash,
+        string memory _image,        // URL de l'image
         string memory tokenURI,
         bool _forSale,
         uint256 _salePrice
@@ -80,7 +81,7 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
             value: _value,
             surface: _surface,
             documentHash: _documentHash,
-            imageHash: _imageHash,
+            image: _image,  // Assigner l'URL de l'image
             previousOwners: prevOwners,
             createdAt: block.timestamp,
             lastTransferAt: block.timestamp,
@@ -91,6 +92,7 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         lastTransaction[to] = block.timestamp;
         return newTokenId;
     }
+
 
     /// @notice Permet d'échanger 3 "maisons" contre une "gare"
     function exchangeForGare(uint256 tokenId1, uint256 tokenId2, uint256 tokenId3, string memory tokenURI) public returns (uint256) {
@@ -130,7 +132,7 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
             value: properties[tokenId1].value,
             surface: 0,
             documentHash: "",
-            imageHash: "",
+            image: "",
             previousOwners: emptyOwners,
             createdAt: block.timestamp,
             lastTransferAt: block.timestamp,
@@ -183,7 +185,7 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
             value: properties[tokenId1].value,
             surface: 0,
             documentHash: "",
-            imageHash: "",
+            image: "",
             previousOwners: emptyOwners,
             createdAt: block.timestamp,
             lastTransferAt: block.timestamp,

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { BlockchainContext } from '../context/BlockchainContext';
 import { ethers } from 'ethers';
 import PropertyCard from '../components/PropertyCard';
+import '../assets/css/Properties.css';
 
 const Properties = () => {
   const { contract } = useContext(BlockchainContext);
@@ -12,13 +13,14 @@ const Properties = () => {
     const loadProperties = async () => {
       if (contract) {
         try {
-          // Utilisation de la fonction getAllProperties() du contrat
           const props = await contract.getAllProperties();
           console.log("Propriétés récupérées :", props);
-          const formattedProperties = props.map(prop => {
+          const formattedProperties = props.map((prop, index) => {
             const createdAt = prop.createdAt.toNumber ? prop.createdAt.toNumber() : Number(prop.createdAt);
             const lastTransferAt = prop.lastTransferAt.toNumber ? prop.lastTransferAt.toNumber() : Number(prop.lastTransferAt);
+            
             return {
+              tokenId: index, 
               name: prop.name,
               propertyType: prop.propertyType,
               location: prop.location,
