@@ -186,29 +186,6 @@ Le rapport technique détaille :
   - Une suite de tests complète a été réalisée pour valider les fonctionnalités du smart contract.
 
 - **Difficultés et Solutions :**
-  - Description des défis rencontrés (gestion des échanges multiples, contraintes temporelles, etc.) et des solutions mises en œuvre.
-
-## Livrables
-
-Le projet comprend :
-
-- **Document de Présentation du Cas d'Usage** (ce README ou un document séparé détaillant le concept et le parcours utilisateur).
-- **Code Source de la DApp** (incluant smart contracts, front-end et scripts de déploiement).
-- **Tests Unitaires** réalisés avec Hardhat.
-- **Rapport Technique** expliquant les choix de conception, le respect des contraintes métiers et les difficultés rencontrées.
-
-## Critères d'Évaluation
-
-- **Pertinence et Originalité du Cas d'Usage :**  
-  La DApp répond à un besoin identifié dans la gestion décentralisée d'actifs numériques.
-
-- **Qualité de la DApp :**  
-  Respect des contraintes techniques et fonctionnelles (tokenisation, échanges, limites de possession, contraintes temporelles, utilisation d’IPFS).
-
-- **Couverture des Tests Unitaires :**  
-  Tests complets validant l'ensemble des fonctionnalités du smart contract.
-
-- **Documentation :**  
-  Documentation claire et complète (README, rapport technique) détaillant les choix de conception, les instructions d'installation et d'utilisation.
+  - Défis rencontrés (gestion des échanges multiples, contraintes temporelles, etc.) et des solutions mises en œuvre.
 
 ---
