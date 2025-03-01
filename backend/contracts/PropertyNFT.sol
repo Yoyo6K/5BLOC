@@ -32,8 +32,8 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
     mapping(uint256 => Property) public properties;
 
     // Durées de cooldown et lock
-    uint256 constant COOLDOWN = 1 minutes;
-    uint256 constant INITIAL_LOCK = 1 minutes;
+    uint256 constant COOLDOWN = 5 minutes;
+    uint256 constant INITIAL_LOCK = 10 minutes;
 
     constructor(address initialOwner)
         ERC721("PropertyNFT", "PROP")
@@ -59,7 +59,7 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         bool _forSale,
         uint256 _salePrice
     ) public onlyOwner returns (uint256) {
-        require(balanceOf(to) < 6, "Recipient already holds max properties");
+        require(balanceOf(to) < 4, "Recipient already holds max properties");
         require(
             compareStrings(_propertyType, "maison") ||
             compareStrings(_propertyType, "gare") ||
@@ -94,6 +94,7 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
     }
 
 
+     /// @notice Permet d'échanger deux tokens entre leurs propriétaires avec règles de conversion.
     function exchangeTokens(uint256 tokenIdA, uint256 tokenIdB) external {
         // Récupérer les propriétaires actuels
         address ownerA = ownerOf(tokenIdA);
@@ -101,20 +102,39 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         
         // Vérifier que l'appelant possède au moins l'un des tokens
         require(msg.sender == ownerA || msg.sender == ownerB, "Caller must own one of the tokens");
-        // Vérifier que les deux tokens ne sont pas déjà détenus par le même utilisateur
+        // Vérifier que les tokens ne sont pas déjà détenus par le même compte
         require(ownerA != ownerB, "Both tokens are already owned by the same account");
         
-        // Optionnel : Vérifier que les tokens sont du même type (exemple : même catégorie)
-        require(compareStrings(properties[tokenIdA].propertyType, properties[tokenIdB].propertyType), "Tokens must be of the same type to exchange");
+        // Récupérer les types de tokens
+        string memory typeA = properties[tokenIdA].propertyType;
+        string memory typeB = properties[tokenIdB].propertyType;
+        
+        // Si les tokens sont du même type, aucune conversion n'est nécessaire.
+        // Sinon, appliquer des règles de conversion.
+        if (!compareStrings(typeA, typeB)) {
+            // la valeur d'une maison multipliée par 2 soit égale à la valeur de la gare.
+            if (compareStrings(typeA, "maison") && compareStrings(typeB, "gare")) {
+                require(properties[tokenIdA].value * 2 == properties[tokenIdB].value, "Conversion ratio invalid: 2 maisons = 1 gare required");
+            } else if (compareStrings(typeA, "gare") && compareStrings(typeB, "maison")) {
+                require(properties[tokenIdB].value * 2 == properties[tokenIdA].value, "Conversion ratio invalid: 2 maisons = 1 gare required");
+            }
+            // la valeur d'une maison multipliée par 3 soit égale à la valeur d'un hotel.
+            else if (compareStrings(typeA, "maison") && compareStrings(typeB, "hotel")) {
+                require(properties[tokenIdA].value * 3 == properties[tokenIdB].value, "Conversion ratio invalid: 3 maisons = 1 hotel required");
+            } else if (compareStrings(typeA, "hotel") && compareStrings(typeB, "maison")) {
+                require(properties[tokenIdB].value * 3 == properties[tokenIdA].value, "Conversion ratio invalid: 3 maisons = 1 hotel required");
+            } else {
+                revert("Exchange not supported for these token types");
+            }
+        }
         
         // Effectuer l'échange en transférant tokenIdA de ownerA à ownerB et tokenIdB de ownerB à ownerA.
         _transfer(ownerA, ownerB, tokenIdA);
         _transfer(ownerB, ownerA, tokenIdB);
         
-        // Mettre à jour l'historique et les timestamps pour tokenIdA
+        // Mettre à jour l'historique et les timestamps
         properties[tokenIdA].previousOwners.push(ownerA);
         properties[tokenIdA].lastTransferAt = block.timestamp;
-        // Mettre à jour l'historique et les timestamps pour tokenIdB
         properties[tokenIdB].previousOwners.push(ownerB);
         properties[tokenIdB].lastTransferAt = block.timestamp;
     }
@@ -138,17 +158,13 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         prop.previousOwners.push(seller);
         // Mettre à jour le timestamp du dernier transfert
         prop.lastTransferAt = block.timestamp;
-
-        // Désactiver la mise en vente du bien (ou vous pouvez prévoir une logique différente)
         prop.forSale = false;
         prop.salePrice = 0;
 
-        // Optionnel : Rembourser le surplus si msg.value > salePrice
         if (msg.value > prop.salePrice) {
         payable(msg.sender).transfer(msg.value - prop.salePrice);
         }
 
-        // Optionnel : Transférer les fonds au vendeur
         payable(seller).transfer(prop.salePrice);
     }
 
@@ -186,7 +202,6 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         return properties[tokenId].previousOwners;
     }
     
-    // Optionnel : fonction pour récupérer toutes les propriétés (pour un nombre limité de tokens)
     function getAllProperties() public view returns (Property[] memory) {
         Property[] memory allProperties = new Property[](tokenCount);
         for (uint256 i = 1; i <= tokenCount; i++) {

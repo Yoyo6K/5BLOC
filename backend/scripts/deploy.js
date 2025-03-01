@@ -1,4 +1,3 @@
-// backend/scripts/deploy.js
 const fs = require('fs');
 const hre = require("hardhat");
 require('dotenv').config();

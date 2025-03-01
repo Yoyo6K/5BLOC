@@ -1,4 +1,3 @@
-// backend/scripts/populateContract.js
 const { ethers } = require("hardhat");
 const fs = require('fs');
 require('dotenv').config();

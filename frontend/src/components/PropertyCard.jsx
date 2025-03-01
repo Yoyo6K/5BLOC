@@ -3,7 +3,13 @@ import "../assets/css/PropertyCard.css";
 import { BlockchainContext } from "../context/BlockchainContext";
 import { ethers } from "ethers";
 
-const PropertyCard = ({ property, isOwnerView = false }) => {
+const PropertyCard = ({
+  property,
+  isOwnerView = false,
+  selectable = false,
+  isSelected = false,
+  onSelect = () => {}
+}) => {
   const [showModal, setShowModal] = useState(false);
   const { contract } = useContext(BlockchainContext);
 
@@ -29,6 +35,7 @@ const PropertyCard = ({ property, isOwnerView = false }) => {
       alert("Achat réussi !");
     } catch (error) {
       console.error("Erreur lors de l'achat :", error);
+      alert("Erreur lors de l'achat. Consultez la console pour plus de détails.");
     }
   };
 
@@ -46,7 +53,7 @@ const PropertyCard = ({ property, isOwnerView = false }) => {
         <p><strong>Valeur :</strong> {property.value} ETH</p>
         <button className="learn-more-button" onClick={handleModalOpen}>En savoir plus</button>
         
-        {/* On affiche le bouton d'achat uniquement si on n'est pas dans la vue propriétaire ET que le bien est en vente */}
+        {/* Bouton d'achat affiché uniquement si on n'est pas dans la vue propriétaire */}
         {(!isOwnerView && property.forSale) ? (
           <div>
             <p><strong>Prix de vente :</strong> {property.salePrice} ETH</p>
@@ -55,6 +62,13 @@ const PropertyCard = ({ property, isOwnerView = false }) => {
         ) : (!isOwnerView ? (
           <p><strong>Non en vente</strong></p>
         ) : null)}
+
+        {/* Bouton de sélection affiché uniquement si selectable est true */}
+        {selectable && (
+          <button className="select-button" onClick={onSelect}>
+            {isSelected ? "Désélectionner" : "Sélectionner"}
+          </button>
+        )}
       </div>
 
       {showModal && (
@@ -64,9 +78,10 @@ const PropertyCard = ({ property, isOwnerView = false }) => {
             <p><strong>Surface :</strong> {property.surface} m²</p>
             <p><strong>Date de création :</strong> {property.createdAt}</p>
             <p><strong>Dernier transfert :</strong> {property.lastTransferAt}</p>
-            <p><strong>Historique des propriétaires :</strong> {property.previousOwners.length > 0 
-              ? property.previousOwners.join(', ') 
-              : 'Aucun propriétaire précédent'}
+            <p>
+              <strong>Historique des propriétaires :</strong> {property.previousOwners.length > 0 
+                ? property.previousOwners.join(', ') 
+                : 'Aucun propriétaire précédent'}
             </p>
             <p><strong>Hash du document :</strong> {property.documentHash}</p>
           </div>
