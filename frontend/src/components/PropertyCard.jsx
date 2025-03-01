@@ -3,9 +3,8 @@ import "../assets/css/PropertyCard.css";
 import { BlockchainContext } from "../context/BlockchainContext";
 import { ethers } from "ethers";
 
-const PropertyCard = ({ property }) => {
+const PropertyCard = ({ property, isOwnerView = false }) => {
   const [showModal, setShowModal] = useState(false);
-
   const { contract } = useContext(BlockchainContext);
 
   const handleModalOpen = () => {
@@ -27,7 +26,6 @@ const PropertyCard = ({ property }) => {
       const salePriceWei = ethers.parseEther(property.salePrice);
       const tx = await contract.buyProperty(property.tokenId, { value: salePriceWei });
       await tx.wait();
-      
       alert("Achat réussi !");
     } catch (error) {
       console.error("Erreur lors de l'achat :", error);
@@ -37,9 +35,9 @@ const PropertyCard = ({ property }) => {
   return (
     <>
       <div className="property-card">
-      <img 
-          src={`http://127.0.0.1:3000${property.tokenURI}`}
-          alt="${property.name}" 
+        <img 
+          src={`https://ipfs.io/ipfs/${property.imageHash}`}
+          alt={property.name} 
           className="property-image" 
         />
         <h3>{property.name}</h3>
@@ -48,12 +46,15 @@ const PropertyCard = ({ property }) => {
         <p><strong>Valeur :</strong> {property.value} ETH</p>
         <button className="learn-more-button" onClick={handleModalOpen}>En savoir plus</button>
         
-        {property.forSale && (
+        {/* On affiche le bouton d'achat uniquement si on n'est pas dans la vue propriétaire ET que le bien est en vente */}
+        {(!isOwnerView && property.forSale) ? (
           <div>
             <p><strong>Prix de vente :</strong> {property.salePrice} ETH</p>
             <button className="buy-button" onClick={handleBuy}>Acheter</button>
           </div>
-        )}
+        ) : (!isOwnerView ? (
+          <p><strong>Non en vente</strong></p>
+        ) : null)}
       </div>
 
       {showModal && (

@@ -32,8 +32,8 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
     mapping(uint256 => Property) public properties;
 
     // Durées de cooldown et lock
-    uint256 constant COOLDOWN = 5 minutes;
-    uint256 constant INITIAL_LOCK = 10 minutes;
+    uint256 constant COOLDOWN = 1 minutes;
+    uint256 constant INITIAL_LOCK = 1 minutes;
 
     constructor(address initialOwner)
         ERC721("PropertyNFT", "PROP")
@@ -59,7 +59,7 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         bool _forSale,
         uint256 _salePrice
     ) public onlyOwner returns (uint256) {
-        require(balanceOf(to) < 4, "Recipient already holds max properties");
+        require(balanceOf(to) < 6, "Recipient already holds max properties");
         require(
             compareStrings(_propertyType, "maison") ||
             compareStrings(_propertyType, "gare") ||
@@ -94,106 +94,29 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
     }
 
 
-    /// @notice Permet d'échanger 3 "maisons" contre une "gare"
-    function exchangeForGare(uint256 tokenId1, uint256 tokenId2, uint256 tokenId3, string memory tokenURI) public returns (uint256) {
-        require(ownerOf(tokenId1) == msg.sender &&
-                ownerOf(tokenId2) == msg.sender &&
-                ownerOf(tokenId3) == msg.sender,
-                "Caller must own all tokens");
-
-        require(
-            compareStrings(properties[tokenId1].propertyType, "maison") &&
-            compareStrings(properties[tokenId2].propertyType, "maison") &&
-            compareStrings(properties[tokenId3].propertyType, "maison"),
-            "All tokens must be maison"
-        );
-
-        require(
-            properties[tokenId1].value == properties[tokenId2].value &&
-            properties[tokenId1].value == properties[tokenId3].value,
-            "All tokens must have the same value"
-        );
-
-        _burn(tokenId1);
-        _burn(tokenId2);
-        _burn(tokenId3);
-
-        _tokenIds++;
-        tokenCount = _tokenIds;
-        uint256 newTokenId = _tokenIds;
-        _mint(msg.sender, newTokenId);
-        _setTokenURI(newTokenId, tokenURI);
-
-        address[] memory emptyOwners;
-        properties[newTokenId] = Property({
-            name: "Gare",
-            propertyType: "gare",
-            location: properties[tokenId1].location,
-            value: properties[tokenId1].value,
-            surface: 0,
-            documentHash: "",
-            image: "",
-            previousOwners: emptyOwners,
-            createdAt: block.timestamp,
-            lastTransferAt: block.timestamp,
-            forSale: false,
-            salePrice: 0
-        });
-
-        return newTokenId;
-    }
-
-    /// @notice Permet d'échanger 4 "maisons" contre un "hotel"
-    function exchangeForHotel(uint256 tokenId1, uint256 tokenId2, uint256 tokenId3, uint256 tokenId4, string memory tokenURI) public returns (uint256) {
-        require(ownerOf(tokenId1) == msg.sender &&
-                ownerOf(tokenId2) == msg.sender &&
-                ownerOf(tokenId3) == msg.sender &&
-                ownerOf(tokenId4) == msg.sender,
-                "Caller must own all tokens");
-
-        require(
-            compareStrings(properties[tokenId1].propertyType, "maison") &&
-            compareStrings(properties[tokenId2].propertyType, "maison") &&
-            compareStrings(properties[tokenId3].propertyType, "maison") &&
-            compareStrings(properties[tokenId4].propertyType, "maison"),
-            "All tokens must be maison"
-        );
-
-        require(
-            properties[tokenId1].value == properties[tokenId2].value &&
-            properties[tokenId1].value == properties[tokenId3].value &&
-            properties[tokenId1].value == properties[tokenId4].value,
-            "All tokens must have the same value"
-        );
-
-        _burn(tokenId1);
-        _burn(tokenId2);
-        _burn(tokenId3);
-        _burn(tokenId4);
-
-        _tokenIds++;
-        tokenCount = _tokenIds;
-        uint256 newTokenId = _tokenIds;
-        _mint(msg.sender, newTokenId);
-        _setTokenURI(newTokenId, tokenURI);
-
-        address[] memory emptyOwners;
-        properties[newTokenId] = Property({
-            name: "Hotel",
-            propertyType: "hotel",
-            location: properties[tokenId1].location,
-            value: properties[tokenId1].value,
-            surface: 0,
-            documentHash: "",
-            image: "",
-            previousOwners: emptyOwners,
-            createdAt: block.timestamp,
-            lastTransferAt: block.timestamp,
-            forSale: false,
-            salePrice: 0
-        });
-
-        return newTokenId;
+    function exchangeTokens(uint256 tokenIdA, uint256 tokenIdB) external {
+        // Récupérer les propriétaires actuels
+        address ownerA = ownerOf(tokenIdA);
+        address ownerB = ownerOf(tokenIdB);
+        
+        // Vérifier que l'appelant possède au moins l'un des tokens
+        require(msg.sender == ownerA || msg.sender == ownerB, "Caller must own one of the tokens");
+        // Vérifier que les deux tokens ne sont pas déjà détenus par le même utilisateur
+        require(ownerA != ownerB, "Both tokens are already owned by the same account");
+        
+        // Optionnel : Vérifier que les tokens sont du même type (exemple : même catégorie)
+        require(compareStrings(properties[tokenIdA].propertyType, properties[tokenIdB].propertyType), "Tokens must be of the same type to exchange");
+        
+        // Effectuer l'échange en transférant tokenIdA de ownerA à ownerB et tokenIdB de ownerB à ownerA.
+        _transfer(ownerA, ownerB, tokenIdA);
+        _transfer(ownerB, ownerA, tokenIdB);
+        
+        // Mettre à jour l'historique et les timestamps pour tokenIdA
+        properties[tokenIdA].previousOwners.push(ownerA);
+        properties[tokenIdA].lastTransferAt = block.timestamp;
+        // Mettre à jour l'historique et les timestamps pour tokenIdB
+        properties[tokenIdB].previousOwners.push(ownerB);
+        properties[tokenIdB].lastTransferAt = block.timestamp;
     }
 
     function buyProperty(uint256 tokenId) external payable {
