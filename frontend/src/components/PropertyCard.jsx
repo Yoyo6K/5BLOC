@@ -38,9 +38,9 @@ const PropertyCard = ({ property }) => {
     <>
       <div className="property-card">
       <img 
-          src={`http://127.0.0.1:3000${property.tokenURI}`}
-          alt="${property.name}" 
-          className="property-image" 
+          src={`http://127.0.0.1:3000${property.imageHash}`}
+          alt={`${property.imageHash}`}
+          className="property.imageHash" 
         />
         <h3>{property.name}</h3>
         <p><strong>Type :</strong> {property.propertyType}</p>

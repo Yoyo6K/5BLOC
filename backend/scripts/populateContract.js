@@ -29,7 +29,7 @@ async function main() {
       value: ethers.parseEther("1"),
       surface: 100,
       documentHash: "docHash1",
-      imageHash: "imgHash1",
+      imageHash: "/img/maison1.jpg",
       tokenURI: "/img/maison1.jpg",
       forSale: true,
       salePrice: ethers.parseEther("0.5")
@@ -42,7 +42,7 @@ async function main() {
       value: ethers.parseEther("12"),
       surface: 120,
       documentHash: "docHash2",
-      imageHash: "imgHash2",
+      imageHash: "/img/maison2.jpg",
       tokenURI: "/img/maison2.jpg",
       forSale: false,
       salePrice: ethers.parseEther("15")
@@ -55,7 +55,7 @@ async function main() {
       value: ethers.parseEther("20"),
       surface: 500,
       documentHash: "docHash3",
-      imageHash: "imgHash3",
+      imageHash: "/img/maison3.jpg",
       tokenURI: "/img/maison3.jpg",
       forSale: true,
       salePrice: ethers.parseEther("10")
@@ -68,7 +68,7 @@ async function main() {
       value: ethers.parseEther("8"),
       surface: 150,
       documentHash: "docHash4",
-      imageHash: "imgHash4",
+      imageHash: "/img/maison4.jpg",
       tokenURI: "/img/maison4.jpg",
       forSale: false,
       salePrice: ethers.parseEther("7")
@@ -81,7 +81,7 @@ async function main() {
       value: ethers.parseEther("30"),
       surface: 600,
       documentHash: "docHash5",
-      imageHash: "imgHash5",
+      imageHash: "/img/hotel1.jpg",
       tokenURI: "/img/hotel1.jpg",
       forSale: true,
       salePrice: ethers.parseEther("25")
@@ -94,7 +94,7 @@ async function main() {
       value: ethers.parseEther("5"),
       surface: 80,
       documentHash: "docHash6",
-      imageHash: "imgHash6",
+      imageHash: "/img/maison5.jpg",
       tokenURI: "/img/maison5.jpg",
       forSale: true,
       salePrice: ethers.parseEther("3")
@@ -107,7 +107,7 @@ async function main() {
       value: ethers.parseEther("40"),
       surface: 700,
       documentHash: "docHash7",
-      imageHash: "imgHash7",
+      imageHash: "/img/hotel2.jpg",
       tokenURI: "/img/hotel2.jpg",
       forSale: false,
       salePrice: ethers.parseEther("35")
@@ -120,7 +120,7 @@ async function main() {
       value: ethers.parseEther("10"),
       surface: 180,
       documentHash: "docHash8",
-      imageHash: "imgHash8",
+      imageHash: "/img/maison6.jpg",
       tokenURI: "/img/maison6.jpg",
       forSale: true,
       salePrice: ethers.parseEther("9")
@@ -133,7 +133,7 @@ async function main() {
       value: ethers.parseEther("50"),
       surface: 800,
       documentHash: "docHash9",
-      imageHash: "imgHash9",
+      imageHash: "/img/hotel3.jpg",
       tokenURI: "/img/hotel3.jpg",
       forSale: false,
       salePrice: ethers.parseEther("45")
@@ -146,7 +146,7 @@ async function main() {
       value: ethers.parseEther("15"),
       surface: 200,
       documentHash: "docHash10",
-      imageHash: "imgHash10",
+      imageHash: "/img/maison7.jpg",
       tokenURI: "/img/maison7.jpg",
       forSale: true,
       salePrice: ethers.parseEther("12")
@@ -159,7 +159,7 @@ async function main() {
       value: ethers.parseEther("60"),
       surface: 900,
       documentHash: "docHash11",
-      imageHash: "imgHash11",
+      imageHash: "/img/hotel4.jpg",
       tokenURI: "/img/hotel4.jpg",
       forSale: true,
       salePrice: ethers.parseEther("50")
@@ -172,7 +172,7 @@ async function main() {
       value: ethers.parseEther("7"),
       surface: 90,
       documentHash: "docHash12",
-      imageHash: "imgHash12",
+      imageHash: "/img/maison8.jpg",
       tokenURI: "/img/maison8.jpg",
       forSale: false,
       salePrice: ethers.parseEther("6")
@@ -185,7 +185,7 @@ async function main() {
       value: ethers.parseEther("70"),
       surface: 1000,
       documentHash: "docHash13",
-      imageHash: "imgHash13",
+      imageHash: "/img/hotel5.jpg",
       tokenURI: "/img/hotel5.jpg",
       forSale: true,
       salePrice: ethers.parseEther("65")
@@ -198,7 +198,7 @@ async function main() {
       value: ethers.parseEther("9"),
       surface: 110,
       documentHash: "docHash14",
-      imageHash: "imgHash14",
+      imageHash: "/img/maison9.jpg",
       tokenURI: "/img/maison9.jpg",
       forSale: true,
       salePrice: ethers.parseEther("8")
@@ -211,7 +211,7 @@ async function main() {
       value: ethers.parseEther("80"),
       surface: 1100,
       documentHash: "docHash15",
-      imageHash: "imgHash15",
+      imageHash: "/img/hotel6.jpg",
       tokenURI: "/img/hotel6.jpg",
       forSale: false,
       salePrice: ethers.parseEther("75")
