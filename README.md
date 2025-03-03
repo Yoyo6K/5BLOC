@@ -1,112 +1,191 @@
-# Projet Web3 – Monopoly
+# Projet Web3 – Développement d'une DApp basée sur la Blockchain
 
 ## Contexte
 
-Le maire de Lyonne souhaite décentraliser la gestion des biens immobiliers de la ville via leur tokenisation. L'objectif est d'offrir aux citoyens une plateforme décentralisée leur permettant d'acquérir et d'échanger ces biens immobiliers, tout en évitant une centralisation excessive.
+Les innovations technologiques liées à la blockchain permettent de décentraliser la gestion et la validation de nombreuses interactions économiques et sociales. Ce projet invite les étudiants à imaginer une application pratique tirant parti des principes du Web3.  
+Notre mission consiste à concevoir une DApp innovante répondant à un cas d’usage que nous avons défini, tout en intégrant des contraintes métiers précises pour guider la conception technique.
+
+## Cas d'Usage
+
+Nous avons choisi de développer une application de **gestion décentralisée d'actifs numériques**. Plus précisément, notre DApp permet de :
+
+- **Tokeniser des ressources** sous forme de tokens (par exemple, "maison", "gare", "hôtel") avec différents niveaux.
+- **Faciliter les échanges** de tokens entre utilisateurs, en appliquant des règles de conversion précises (par exemple, conversion entre types de tokens).
+- **Limiter la possession** des ressources à un maximum de 4 tokens par utilisateur.
+- **Imposer des contraintes temporelles** (cooldown et lock) pour sécuriser les transactions.
+- **Stocker les métadonnées** (documents, images, etc.) sur IPFS.
 
 ## Objectifs du Projet
 
-- **Tokenisation des biens immobiliers :** Conversion des propriétés en actifs numériques via des NFT (ERC-721).
-- **Consultation et achat de biens :** Permettre aux citoyens de visualiser les biens disponibles et d'acquérir ceux qui les intéressent.
-- **Échange de biens :** Faciliter les échanges entre citoyens selon des règles précises (ex. 3 maisons pour 1 gare, 4 maisons pour 1 hôtel).
-- **Gestion des documents de propriété :** Stocker les documents sur IPFS et enregistrer le hash dans le smart contract.
-- **Respect des règles de gouvernance :**  
-  - Limite de possession : maximum 4 actifs par adresse.  
-  - Types de biens : maisons, gares, hôtels.  
-  - Contraintes d’échange : échange uniquement entre biens de même valeur.  
-  - Contraintes temporelles : cooldown de 5 minutes entre deux transactions et lock de 10 minutes après un achat initial.
+- **Tokenisation des ressources :**  
+  Représenter chaque actif numérique par un token conforme au standard ERC-721, incluant des métadonnées (nom, type, valeur, document, image, historique des propriétaires, etc.).
 
-## Déploiement en Local
+- **Échanges de tokens :**  
+  Implémenter un mécanisme d’échange de tokens entre utilisateurs.  
+  Définir des règles précises pour valider les transactions, par exemple une règle de conversion entre types (exemple : 2 maisons = 1 gare, 3 maisons = 1 hôtel).
 
-L'option 2 consiste à exécuter tous les tests dans un environnement local (Hardhat Network). Aucune configuration pour un réseau public n'est nécessaire dans cette option.
+- **Limites de possession :**  
+  Chaque utilisateur ne peut posséder qu’un maximum de 4 tokens.
 
-# Documentation Technique et Choix Techniques
+- **Contraintes temporelles :**  
+  Appliquer un cooldown (5 minutes) entre deux transactions successives et un lock (10 minutes) après une acquisition.
 
-## Smart Contract
-Le contrat **PropertyNFT** est basé sur les standards **ERC-721** d'OpenZeppelin et intègre des règles métier spécifiques pour la tokenisation immobilière :
-- Limite de **4 biens** par utilisateur.
-- Mécanismes d'**échanges définis**.
-- **Contraintes temporelles** pour certaines opérations.
+- **Utilisation d’IPFS :**  
+  Stocker les documents et images liés aux tokens sur IPFS et enregistrer leurs hash dans les smart contracts.
 
-## Tests Unitaires
-Les tests sont écrits avec **Hardhat**, **Chai** et utilisent les helpers de **Hardhat Network** (ex. `time.increase` pour manipuler le temps).  
-Ils garantissent que toutes les fonctionnalités du smart contract fonctionnent comme prévu dans un **environnement local**.
+- **Tests unitaires :**  
+  Assurer une couverture de tests significative à l’aide de Hardhat pour valider l’ensemble des fonctionnalités du smart contract.
 
-## Architecture du Projet
-Le projet est structuré de manière à séparer clairement :
-- Le **backend** (smart contracts et tests).
-- Le **frontend** (interface utilisateur).
+## Format des Métadonnées
 
-Cette séparation facilite la **maintenance** et l'**évolution future** du projet.
-
-## Format des Biens (Metadata)
-
-Chaque bien est représenté par une structure comportant les informations suivantes :
+Chaque token est accompagné d’un fichier JSON (stocké sur IPFS) contenant au moins les informations suivantes :
 
 ```json
 {
-  "name": "Nom du bien",
-  "type": "maison|gare|hotel",
-  "location": "Quartier/Adresse",
-  "value": "Valeur en ETH/SOL",
-  "surface": "Surface en m²",
-  "documentHash": "Hash IPFS du document de propriété",
-  "imageHash": "Hash IPFS de l'image du bien",
-  "previousOwners": ["liste des adresses des propriétaires précédents"],
-  "createdAt": "timestamp de création",
-  "lastTransferAt": "timestamp du dernier transfert"
+  "name": "Nom de la ressource",
+  "type": "Type de ressource (ex. maison, gare, hôtel)",
+  "value": "Valeur associée à la ressource",
+  "hash": "Hash IPFS du document lié",
+  "previousOwners": ["Liste des adresses des anciens propriétaires"],
+  "createdAt": "Timestamp de création",
+  "lastTransferAt": "Timestamp du dernier transfert"
+  // ... autres attributs éventuels
 }
 ```
-# Spécifications Techniques
-## Smart Contract (Backend)
 
-- **Langage** : Solidity (version 0.8.19)
-- **Standard** : ERC-721 avec l'extension ERC721URIStorage
-- **Sécurité et Best Practices** :
-  - Utilisation des contrats OpenZeppelin
-  - Implémentation des règles métier spécifiques (limite de 4 biens, échanges selon règles prédéfinies, contraintes temporelles, etc.)
+## Architecture du Projet
 
-## Tests Unitaires
+Le projet est structuré en deux parties principales :
 
-- **Option 2 choisie** : Environnement local basé sur Hardhat
-- **Suite de tests unitaires** couvrant l'intégralité des fonctionnalités du smart contract
+- **Backend :**
+  - Smart Contracts (développés en Solidity, standard ERC-721)
+  - Scripts de déploiement et de tests unitaires (avec Hardhat)
+  - Gestion des contraintes métiers (limite de possession, échanges avec règles de conversion, contraintes temporelles)
 
-## Stockage
+- **Frontend :**
+  - Application React permettant la connexion au wallet (MetaMask), la consultation, l'achat et l'échange de tokens
+  - Interface utilisateur responsive et intuitive
+  - Utilisation d’un contexte blockchain pour interagir avec le smart contract
 
-- **Documents de propriété** : Stockés sur IPFS (le hash est enregistré dans le smart contract)
-- **Historique des propriétaires** : Conservé dans les métadonnées du NFT
+## Spécifications Techniques
 
-# Installation et Configuration
+### Smart Contract (Backend)
 
-## Prérequis :
+- **Langage :** Solidity (version 0.8.28)
+- **Standard :** ERC-721 avec extension ERC721URIStorage
+- **Fonctionnalités clés :**
+  - Mint de tokens avec métadonnées et mise en vente
+  - Fonction d'achat (`buyProperty`)
+  - Fonction d'échange (`exchangeTokens`) avec règles de conversion entre types (ex. 2 maisons = 1 gare, 3 maisons = 1 hôtel)
+  - Vérification de la limite de possession (max. 4 tokens par utilisateur)
+  - Application des contraintes temporelles (cooldown et lock)
+  - Stockage des hash IPFS pour documents et images
+  - Fonctions de consultation (getPreviousOwners, getAllProperties)
+
+### Tests Unitaires
+
+- **Outils :** Hardhat, Chai et helpers de Hardhat Network (ex. `time.increase`)
+- **Couverture :**
+  - Mint des tokens et vérification des métadonnées
+  - Validation des règles de possession (max. 4 tokens)
+  - Tests des échanges de tokens avec règles de conversion
+  - Tests des contraintes temporelles (cooldown et lock)
+  - Tests de la fonction d'achat (vérification des fonds, transfert de propriété, etc.)
+
+### Stockage
+
+- **IPFS :**
+  Les documents et images relatifs aux tokens sont stockés sur IPFS. Les hash IPFS sont enregistrés dans le smart contract et utilisés par le front-end via une passerelle (ex. `https://ipfs.io/ipfs/`).
+
+## Installation et Configuration
+
+### Prérequis
 
 - Node.js (version 14 ou supérieure)
 - npm (ou yarn)
+- MetaMask installé dans le navigateur
 
-## Installation des dépendances :
+### Installation des Dépendances
 
+Dans le dossier racine du projet (ou dans les dossiers `backend` et `frontend` séparément) :
 ```bash
 npm install
 ```
 
-## Compilation des Smart Contracts :
+### Compilation des Smart Contracts
 
+Dans le dossier `backend` :
 ```bash
 npx hardhat compile
 ```
 
-## Exécution des tests unitaires :
+### Exécution des Tests Unitaires
 
+Dans le dossier `backend` :
 ```bash
 npx hardhat test
 ```
 
-### Les tests couvrent :
+### Déploiement en Local
 
-- Le minting des biens et la vérification des métadonnées.
-- Le rejet de mint en cas de type invalide ou de dépassement de la limite de 4 biens.
-- Les échanges (3 maisons → 1 gare et 4 maisons → 1 hôtel) avec vérification des conditions d'échange.
-- Les contraintes temporelles (cooldown et lock initial) lors des transferts.
-- La mise à jour de l'historique des propriétaires (`previousOwners`) et du timestamp (`lastTransferAt`).
+1. Lancez Hardhat Node pour simuler un réseau local :
+   ```bash
+   npx hardhat node
+   ```
+2. Déployez le contrat :
+   ```bash
+   npx hardhat run scripts/deploy.js --network localhost
+   ```
+   N'oubliez pas de mettre à jour l'ABI et le deployedContract.json côté front-end après le déploiement.
 
-## Frontend (en Développement)
+### Frontend
+
+Dans le dossier `frontend` :
+```bash
+npm start
+```
+L’application se lance par défaut sur [http://localhost:3000](http://localhost:3000).  
+Utilisez MetaMask pour connecter votre wallet et interagir avec la DApp.
+
+## Utilisation de la DApp
+
+- **Connexion Wallet :**  
+  Connectez votre wallet via MetaMask pour accéder aux fonctionnalités de la DApp.
+
+- **Consultation des Tokens :**  
+  - La page **Propriétés disponibles** affiche les tokens en vente.
+  - La page **Mes Propriétés** affiche les tokens que vous possédez.
+
+- **Achat de Tokens :**  
+  Dans la page **Propriétés disponibles**, cliquez sur "Acheter" pour acquérir un token mis en vente.
+
+- **Échange de Tokens :**  
+  La page **Échange** vous permet de :
+  - Sélectionner plusieurs tokens dans **Mes Tokens** (ceux que vous possédez).
+  - Sélectionner plusieurs tokens dans **Tokens Disponibles** (ceux appartenant aux autres).
+  - Procéder à l'échange par paire (selon la logique définie dans le contrat, avec application des règles de conversion).
+
+## Rapport Technique
+
+Le rapport technique détaille :
+
+- **Choix de Conception :**
+  - Utilisation d'Ethereum (Hardhat) et React pour le développement.
+  - Adoption du standard ERC-721 et utilisation d’OpenZeppelin pour la sécurité.
+
+- **Contraintes Métiers :**
+  - Limite de 4 tokens par utilisateur.
+  - Règles de conversion pour l'échange de tokens (par exemple, 2 maisons = 1 gare, 3 maisons = 1 hôtel).
+  - Contraintes temporelles (cooldown et lock).
+  - Stockage des métadonnées sur IPFS.
+
+- **Architecture :**
+  - Séparation claire entre le backend (smart contracts, tests, scripts de déploiement) et le frontend (interface utilisateur).
+
+- **Tests Unitaires :**
+  - Une suite de tests complète a été réalisée pour valider les fonctionnalités du smart contract.
+
+- **Difficultés et Solutions :**
+  - Défis rencontrés (gestion des échanges multiples, contraintes temporelles, etc.) et des solutions mises en œuvre.
+
+---

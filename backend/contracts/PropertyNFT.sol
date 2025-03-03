@@ -94,106 +94,49 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
     }
 
 
-    /// @notice Permet d'échanger 3 "maisons" contre une "gare"
-    function exchangeForGare(uint256 tokenId1, uint256 tokenId2, uint256 tokenId3, string memory tokenURI) public returns (uint256) {
-        require(ownerOf(tokenId1) == msg.sender &&
-                ownerOf(tokenId2) == msg.sender &&
-                ownerOf(tokenId3) == msg.sender,
-                "Caller must own all tokens");
-
-        require(
-            compareStrings(properties[tokenId1].propertyType, "maison") &&
-            compareStrings(properties[tokenId2].propertyType, "maison") &&
-            compareStrings(properties[tokenId3].propertyType, "maison"),
-            "All tokens must be maison"
-        );
-
-        require(
-            properties[tokenId1].value == properties[tokenId2].value &&
-            properties[tokenId1].value == properties[tokenId3].value,
-            "All tokens must have the same value"
-        );
-
-        _burn(tokenId1);
-        _burn(tokenId2);
-        _burn(tokenId3);
-
-        _tokenIds++;
-        tokenCount = _tokenIds;
-        uint256 newTokenId = _tokenIds;
-        _mint(msg.sender, newTokenId);
-        _setTokenURI(newTokenId, tokenURI);
-
-        address[] memory emptyOwners;
-        properties[newTokenId] = Property({
-            name: "Gare",
-            propertyType: "gare",
-            location: properties[tokenId1].location,
-            value: properties[tokenId1].value,
-            surface: 0,
-            documentHash: "",
-            image: "",
-            previousOwners: emptyOwners,
-            createdAt: block.timestamp,
-            lastTransferAt: block.timestamp,
-            forSale: false,
-            salePrice: 0
-        });
-
-        return newTokenId;
-    }
-
-    /// @notice Permet d'échanger 4 "maisons" contre un "hotel"
-    function exchangeForHotel(uint256 tokenId1, uint256 tokenId2, uint256 tokenId3, uint256 tokenId4, string memory tokenURI) public returns (uint256) {
-        require(ownerOf(tokenId1) == msg.sender &&
-                ownerOf(tokenId2) == msg.sender &&
-                ownerOf(tokenId3) == msg.sender &&
-                ownerOf(tokenId4) == msg.sender,
-                "Caller must own all tokens");
-
-        require(
-            compareStrings(properties[tokenId1].propertyType, "maison") &&
-            compareStrings(properties[tokenId2].propertyType, "maison") &&
-            compareStrings(properties[tokenId3].propertyType, "maison") &&
-            compareStrings(properties[tokenId4].propertyType, "maison"),
-            "All tokens must be maison"
-        );
-
-        require(
-            properties[tokenId1].value == properties[tokenId2].value &&
-            properties[tokenId1].value == properties[tokenId3].value &&
-            properties[tokenId1].value == properties[tokenId4].value,
-            "All tokens must have the same value"
-        );
-
-        _burn(tokenId1);
-        _burn(tokenId2);
-        _burn(tokenId3);
-        _burn(tokenId4);
-
-        _tokenIds++;
-        tokenCount = _tokenIds;
-        uint256 newTokenId = _tokenIds;
-        _mint(msg.sender, newTokenId);
-        _setTokenURI(newTokenId, tokenURI);
-
-        address[] memory emptyOwners;
-        properties[newTokenId] = Property({
-            name: "Hotel",
-            propertyType: "hotel",
-            location: properties[tokenId1].location,
-            value: properties[tokenId1].value,
-            surface: 0,
-            documentHash: "",
-            image: "",
-            previousOwners: emptyOwners,
-            createdAt: block.timestamp,
-            lastTransferAt: block.timestamp,
-            forSale: false,
-            salePrice: 0
-        });
-
-        return newTokenId;
+     /// @notice Permet d'échanger deux tokens entre leurs propriétaires avec règles de conversion.
+    function exchangeTokens(uint256 tokenIdA, uint256 tokenIdB) external {
+        // Récupérer les propriétaires actuels
+        address ownerA = ownerOf(tokenIdA);
+        address ownerB = ownerOf(tokenIdB);
+        
+        // Vérifier que l'appelant possède au moins l'un des tokens
+        require(msg.sender == ownerA || msg.sender == ownerB, "Caller must own one of the tokens");
+        // Vérifier que les tokens ne sont pas déjà détenus par le même compte
+        require(ownerA != ownerB, "Both tokens are already owned by the same account");
+        
+        // Récupérer les types de tokens
+        string memory typeA = properties[tokenIdA].propertyType;
+        string memory typeB = properties[tokenIdB].propertyType;
+        
+        // Si les tokens sont du même type, aucune conversion n'est nécessaire.
+        // Sinon, appliquer des règles de conversion.
+        if (!compareStrings(typeA, typeB)) {
+            // la valeur d'une maison multipliée par 2 soit égale à la valeur de la gare.
+            if (compareStrings(typeA, "maison") && compareStrings(typeB, "gare")) {
+                require(properties[tokenIdA].value * 2 == properties[tokenIdB].value, "Conversion ratio invalid: 2 maisons = 1 gare required");
+            } else if (compareStrings(typeA, "gare") && compareStrings(typeB, "maison")) {
+                require(properties[tokenIdB].value * 2 == properties[tokenIdA].value, "Conversion ratio invalid: 2 maisons = 1 gare required");
+            }
+            // la valeur d'une maison multipliée par 3 soit égale à la valeur d'un hotel.
+            else if (compareStrings(typeA, "maison") && compareStrings(typeB, "hotel")) {
+                require(properties[tokenIdA].value * 3 == properties[tokenIdB].value, "Conversion ratio invalid: 3 maisons = 1 hotel required");
+            } else if (compareStrings(typeA, "hotel") && compareStrings(typeB, "maison")) {
+                require(properties[tokenIdB].value * 3 == properties[tokenIdA].value, "Conversion ratio invalid: 3 maisons = 1 hotel required");
+            } else {
+                revert("Exchange not supported for these token types");
+            }
+        }
+        
+        // Effectuer l'échange en transférant tokenIdA de ownerA à ownerB et tokenIdB de ownerB à ownerA.
+        _transfer(ownerA, ownerB, tokenIdA);
+        _transfer(ownerB, ownerA, tokenIdB);
+        
+        // Mettre à jour l'historique et les timestamps
+        properties[tokenIdA].previousOwners.push(ownerA);
+        properties[tokenIdA].lastTransferAt = block.timestamp;
+        properties[tokenIdB].previousOwners.push(ownerB);
+        properties[tokenIdB].lastTransferAt = block.timestamp;
     }
 
     function buyProperty(uint256 tokenId) external payable {
@@ -215,17 +158,13 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         prop.previousOwners.push(seller);
         // Mettre à jour le timestamp du dernier transfert
         prop.lastTransferAt = block.timestamp;
-
-        // Désactiver la mise en vente du bien (ou vous pouvez prévoir une logique différente)
         prop.forSale = false;
         prop.salePrice = 0;
 
-        // Optionnel : Rembourser le surplus si msg.value > salePrice
         if (msg.value > prop.salePrice) {
         payable(msg.sender).transfer(msg.value - prop.salePrice);
         }
 
-        // Optionnel : Transférer les fonds au vendeur
         payable(seller).transfer(prop.salePrice);
     }
 
@@ -263,7 +202,6 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
         return properties[tokenId].previousOwners;
     }
     
-    // Optionnel : fonction pour récupérer toutes les propriétés (pour un nombre limité de tokens)
     function getAllProperties() public view returns (Property[] memory) {
         Property[] memory allProperties = new Property[](tokenCount);
         for (uint256 i = 1; i <= tokenCount; i++) {

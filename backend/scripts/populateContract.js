@@ -1,4 +1,3 @@
-// backend/scripts/populateContract.js
 const { ethers } = require("hardhat");
 const fs = require('fs');
 require('dotenv').config();
@@ -39,7 +38,7 @@ async function main() {
       name: "Maison 2",
       propertyType: "maison",
       location: "Rue 2",
-      value: ethers.parseEther("12"),
+      value: ethers.parseEther("1"),
       surface: 120,
       documentHash: "docHash2",
       imageHash: "/img/maison2.jpg",
@@ -52,7 +51,7 @@ async function main() {
       name: "Maison 3",
       propertyType: "maison",
       location: "Centre-ville",
-      value: ethers.parseEther("20"),
+      value: ethers.parseEther("1"),
       surface: 500,
       documentHash: "docHash3",
       imageHash: "/img/maison3.jpg",
