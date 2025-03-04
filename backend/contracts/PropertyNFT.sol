@@ -94,6 +94,93 @@ contract PropertyNFT is ERC721URIStorage, Ownable {
     }
 
 
+    // Trace du travail sur l'échange de tokens
+    // Après changement du sujet
+
+    // /// @notice Permet d'échanger 3 maisons pour une gare
+    // function exchangeForGare(uint256 tokenId1, uint256 tokenId2, uint256 tokenId3, string memory tokenURI) external {
+    //     require(ownerOf(tokenId1) == msg.sender && ownerOf(tokenId2) == msg.sender && ownerOf(tokenId3) == msg.sender, "Caller must own all tokens");
+
+    //     Property memory prop1 = properties[tokenId1];
+    //     Property memory prop2 = properties[tokenId2];
+    //     Property memory prop3 = properties[tokenId3];
+
+    //     require(compareStrings(prop1.propertyType, "maison") && compareStrings(prop2.propertyType, "maison") && compareStrings(prop3.propertyType, "maison"), "All tokens must be maison");
+    //     require(prop1.value == prop2.value && prop2.value == prop3.value, "All tokens must have the same value");
+
+    //     _burn(tokenId1);
+    //     _burn(tokenId2);
+    //     _burn(tokenId3);
+
+    //     _tokenIds++;
+    //     uint256 newTokenId = _tokenIds;
+    //     _mint(msg.sender, newTokenId);
+    //     _setTokenURI(newTokenId, tokenURI);
+
+    //     properties[newTokenId] = Property({
+    //         name: "Gare",
+    //         propertyType: "gare",
+    //         location: prop1.location,
+    //         value: prop1.value * 3,
+    //         surface: prop1.surface,
+    //         documentHash: prop1.documentHash,
+    //         image: prop1.image,
+    //         previousOwners: new address[](0),
+    //         createdAt: block.timestamp,
+    //         lastTransferAt: block.timestamp,
+    //         forSale: false,
+    //         salePrice: 0
+    //     });
+
+    //     emit Transfer(msg.sender, address(0), tokenId1);
+    //     emit Transfer(msg.sender, address(0), tokenId2);
+    //     emit Transfer(msg.sender, address(0), tokenId3);
+    // }
+
+    // /// @notice Permet d'échanger 4 maisons pour un hôtel
+    // function exchangeForHotel(uint256 tokenId1, uint256 tokenId2, uint256 tokenId3, uint256 tokenId4, string memory tokenURI) external {
+    //     require(ownerOf(tokenId1) == msg.sender && ownerOf(tokenId2) == msg.sender && ownerOf(tokenId3) == msg.sender && ownerOf(tokenId4) == msg.sender, "Caller must own all tokens");
+
+    //     Property memory prop1 = properties[tokenId1];
+    //     Property memory prop2 = properties[tokenId2];
+    //     Property memory prop3 = properties[tokenId3];
+    //     Property memory prop4 = properties[tokenId4];
+
+    //     require(compareStrings(prop1.propertyType, "maison") && compareStrings(prop2.propertyType, "maison") && compareStrings(prop3.propertyType, "maison") && compareStrings(prop4.propertyType, "maison"), "All tokens must be maison");
+    //     require(prop1.value == prop2.value && prop2.value == prop3.value && prop3.value == prop4.value, "All tokens must have the same value");
+
+    //     _burn(tokenId1);
+    //     _burn(tokenId2);
+    //     _burn(tokenId3);
+    //     _burn(tokenId4);
+
+    //     _tokenIds++;
+    //     uint256 newTokenId = _tokenIds;
+    //     _mint(msg.sender, newTokenId);
+    //     _setTokenURI(newTokenId, tokenURI);
+
+    //     properties[newTokenId] = Property({
+    //         name: "Hotel",
+    //         propertyType: "hotel",
+    //         location: prop1.location,
+    //         value: prop1.value * 4,
+    //         surface: prop1.surface,
+    //         documentHash: prop1.documentHash,
+    //         image: prop1.image,
+    //         previousOwners: new address[](0),
+    //         createdAt: block.timestamp,
+    //         lastTransferAt: block.timestamp,
+    //         forSale: false,
+    //         salePrice: 0
+    //     });
+
+    //     emit Transfer(msg.sender, address(0), tokenId1);
+    //     emit Transfer(msg.sender, address(0), tokenId2);
+    //     emit Transfer(msg.sender, address(0), tokenId3);
+    //     emit Transfer(msg.sender, address(0), tokenId4);
+    // }
+
+
      /// @notice Permet d'échanger deux tokens entre leurs propriétaires avec règles de conversion.
     function exchangeTokens(uint256 tokenIdA, uint256 tokenIdB) external {
         // Récupérer les propriétaires actuels
